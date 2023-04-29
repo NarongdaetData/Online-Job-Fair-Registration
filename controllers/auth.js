@@ -30,7 +30,6 @@ const sendTokenResponse = (user, statusCode, res) => {
 //@access Public
 exports.register = async (req, res, next) => {
   try {
-    console.log(req.body)
     const { name, tel, email, password, role } = req.body;
     //Create user
 

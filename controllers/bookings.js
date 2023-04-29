@@ -37,7 +37,6 @@ exports.getBookings=async (req,res,next)=>{
 
     try{
         const bookings= await query;
-        console.log(bookings);
         res.status(200).json({
             success:true,
             count:bookings.length,
@@ -125,8 +124,8 @@ exports.updateBooking=async (req,res,next)=>{
         }
 
         //Make sure user is the booking owner
-        if(v.user.toString()!== req.user.id && req.user.role!== 'admin'){
-            res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to update this booking`});
+        if(booking.user.toString()!== req.user.id && req.user.role!== 'admin'){
+            return res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to update this booking`});
         }
 
         booking = await Booking.findByIdAndUpdate(req.params.id,req.body,{new:true, runValidators:true});
@@ -154,7 +153,7 @@ exports.deleteBooking=async (req,res,next)=>{
 
         //Make sure user is the booking owner
         if(booking.user.toString()!== req.user.id && req.user.role!== 'admin'){
-            res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to delete this booking`});
+            return res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to delete this booking`});
         }
 
         await booking.remove();
