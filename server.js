@@ -9,6 +9,9 @@ const xss=require('xss-clean')
 const rateLimit=require('express-rate-limit')
 const hpp=require('hpp');
 
+//Route files
+const auth = require('./routes/auth.js');
+
 //Load env vars
 dotenv.config({path:'./config/config.env'});
 
@@ -17,9 +20,7 @@ connectDB();
 
 const app = express();
 
-app.get('/',(req,res)=>{
-    res.status(200).json({sucess:true,msg:'hello world'});
-});
+
 
 app.use(express.json());
 app.use(cors());
@@ -34,6 +35,9 @@ app.use(rateLimit({
 ));
 app.use(hpp());
 
+//Mount routers
+app.use('/api/v1/auth', auth);
+//end Mount routers
 
 
 const PORT = process.env.PORT || 8080;
