@@ -30,9 +30,11 @@ const sendTokenResponse = (user, statusCode, res) => {
 //@access Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, tel, email, password, role } = req.body;
+    const { name, tel, email, password, confirmpassword, role } = req.body;
     //Create user
-
+    if(password != confirmpassword){
+      return res.status(400).json({success:false, message:`password not match with the comfirmpassword`})
+    }
     const user = await User.create({
       name,
       tel,
