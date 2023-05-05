@@ -60,7 +60,14 @@ exports.exportBookings = async (req, res, next) => {
     }
 
     try {
-        const bookings = await Booking.find()
+        const bookings = await Booking.find().populate({
+            path: 'user',
+            select: 'name'
+        }).populate({
+            path: 'company',
+            select: 'name'
+        });
+
         const csv = json2csvParser.parse(bookings);
 
         res.setHeader('Content-disposition', 'attachment; filename=bookings.csv');

@@ -2,3 +2,4 @@
 node_modules/*
 # ignore confid file
 config/config.env
+booking.csv
