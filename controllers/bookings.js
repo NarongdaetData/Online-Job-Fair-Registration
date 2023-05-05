@@ -2,7 +2,7 @@ const Booking = require('../models/Booking');
 const Company = require('../models/Company');
 const { route } = require('../routes/auth');
 
-const json2csv = require('json2csv').parse;
+const json2csvParser = require('json2csv');
 const fs = require('fs');
 
 //desc      Get all bookings
