@@ -65,20 +65,10 @@ exports.createCompany= async (req,res,next)=>{
 //@access   Private
 exports.updateCompany= async (req,res,next)=>{
     try{
-        const { name, address, website, description, tel,maximumNumberOfbooking } = req.body;
-        const company = await Company.findByIdAndUpdate(req.params.id, {
-            name,
-            address,
-            website,
-            description,
-            tel,
-            numberOfbooking,
-            maximumNumberOfbooking
-          }, {
+        const company = await Company.findByIdAndUpdate(req.params.id, req.body, {
             new: true,
             runValidators: true
         })
-
         if(!company){
             return res.status(400).json({sucess: false});
         }
