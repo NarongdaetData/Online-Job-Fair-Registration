@@ -66,7 +66,7 @@ exports.exportBookings = async (req, res, next) => {
             select: 'name address website description tel',
         });
 
-        const fields = ['id', 'user', 'company', 'date', 'status'];
+        const fields = ['id', 'bookingDate', 'user', 'company','createAt' ];
         const opts = { fields };
         const csv = json2csv(bookings, opts);
 
