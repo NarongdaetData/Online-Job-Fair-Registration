@@ -52,9 +52,6 @@ exports.getBookings = async (req, res, next) => {
 };
 
 
-//desc      Export all bookings as CSV
-//@route    GET /api/v1/bookings/export
-//@access   Private (admin only)
 exports.exportBookings = async (req, res, next) => {
     if (req.user.role !== 'admin') {
         return res.status(401).json({ success: false, message: 'Not authorized to perform this action' });
@@ -63,12 +60,15 @@ exports.exportBookings = async (req, res, next) => {
     try {
         const bookings = await Booking.find().populate({
             path: 'company',
-            select: 'name address website description tel',
+            select: 'name',
+        }).populate({
+            path: 'user',
+            select: 'name'
         });
 
-        const fields = ['id', 'user', 'company', 'date', 'status'];
+        const fields = ['id', 'bookingDate', 'user.name', 'company.name'];
         const opts = { fields };
-        const csv = json2csv(bookings, opts);
+        const csv = json2csvParser.parse(bookings);
 
         res.setHeader('Content-disposition', 'attachment; filename=bookings.csv');
         res.set('Content-Type', 'text/csv');
@@ -159,17 +159,13 @@ exports.updateBooking = async (req, res, next) => {
         if (booking.user.toString() !== req.user.id && req.user.role !== 'admin') {
             return res.status(401).json({ success: false, message: `User ${req.user.id} is not authorized to update this booking` });
         }
-        
-        if(Date.parse(req.body.bookingDate)<Date.parse("May 10, 2022") || 
-                Date.parse(req.body.bookingDate)>=Date.parse("May 14, 2022")){
 
-<<<<<<< HEAD
+        if (Date.parse(req.body.bookingDate) < Date.parse("May 10, 2022") ||
+            Date.parse(req.body.bookingDate) >= Date.parse("May 14, 2022")) {
+
+            return res.status(400).json({ success: false, message: `The user with ID ${req.user.id} can only booking during May 10-13 2022` })
+        }
         booking = await Booking.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
-=======
-            return res.status(400).json({success:false, message:`The user with ID ${req.user.id} can only booking during May 10-13 2022`})
-}
-        booking = await Booking.findByIdAndUpdate(req.params.id,req.body,{new:true, runValidators:true});
->>>>>>> 185cca395e7fced51fe73565ba461ec2b58a07d9
 
         res.status(200).json({
             status: true,
