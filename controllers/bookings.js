@@ -60,21 +60,21 @@ exports.exportBookings = async (req, res, next) => {
     }
 
     try {
-        const bookings = await Booking.find().populate({
-            path: 'company',
-            select: 'name',
-        }).populate({
-            path: 'user',
-            select: 'name'
-        });
-
-        const fields = ['id', 'bookingDate', 'user.name', 'company.name'];
-        const opts = { fields };
+        const bookings = await Booking.find()
         const csv = json2csvParser.parse(bookings);
 
         res.setHeader('Content-disposition', 'attachment; filename=bookings.csv');
         res.set('Content-Type', 'text/csv');
         res.status(200).send(csv);
+
+        fs.writeFile('booking.csv', csv, (err) => {
+            if (err) {
+                console.error(err);
+                return;
+            }
+            console.log('File written successfully');
+        });
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({ success: false, message: 'Failed to export bookings' });
@@ -113,13 +113,13 @@ exports.addBooking = async (req, res, next) => {
     try {
         req.body.company = req.params.companyId;
 
-        var { name, address, website, description, tel ,numberOfbooking,maximumNumberOfbooking}  = await Company.findById(req.params.companyId);
+        var { name, address, website, description, tel, numberOfbooking, maximumNumberOfbooking } = await Company.findById(req.params.companyId);
 
-        if (numberOfbooking+1>maximumNumberOfbooking) {
-            return res.status(404).json({ success: false, message: `Booking is already full`});
+        if (numberOfbooking + 1 > maximumNumberOfbooking) {
+            return res.status(404).json({ success: false, message: `Booking is already full` });
         }
-        numberOfbooking = numberOfbooking+1
-        const company = await Company.findByIdAndUpdate(req.params.companyId,{ name, address, website, description, tel ,numberOfbooking,maximumNumberOfbooking} , {
+        numberOfbooking = numberOfbooking + 1
+        const company = await Company.findByIdAndUpdate(req.params.companyId, { name, address, website, description, tel, numberOfbooking, maximumNumberOfbooking }, {
             new: true,
             runValidators: true
         })
