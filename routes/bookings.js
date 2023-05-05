@@ -13,7 +13,7 @@ router.route('/:id')
     .get(protect, getBooking)
     .put(protect, authorize('admin', 'user'), updateBooking)
     .delete(protect, authorize('admin', 'user'), deleteBooking);
-router.route('export')
+router.route('/export')
     .get(protect, authorize('admin'), exportBookings)
 
 module.exports = router;
