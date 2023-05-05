@@ -1,10 +1,10 @@
 const express = require('express');
 
-const {getBookings, getBooking, addBooking, updateBooking, deleteBooking} = require('../controllers/bookings');
+const { getBookings, exportBookings, getBooking, addBooking, updateBooking, deleteBooking } = require('../controllers/bookings');
 
-const router = express.Router({mergeParams:true});
+const router = express.Router({ mergeParams: true });
 
-const {protect, authorize}= require('../middleware/auth');
+const { protect, authorize } = require('../middleware/auth');
 
 router.route('/')
     .get(protect, getBookings)
@@ -13,6 +13,8 @@ router.route('/:id')
     .get(protect, getBooking)
     .put(protect, authorize('admin', 'user'), updateBooking)
     .delete(protect, authorize('admin', 'user'), deleteBooking);
+router.route('export')
+    .get(protect, authorize('admin'), exportBookings)
 
-module.exports=router;
+module.exports = router;
 
