@@ -40,7 +40,20 @@ exports.getCompany= async (req,res,next)=>{
 //@route    POST /api/v1/companies
 //@access   Private
 exports.createCompany= async (req,res,next)=>{
-    const company = await Company.create(req.body);
+    const { name, address, website, description, tel,maximumNumberOfbooking } = req.body;
+    const numberOfbooking = 0
+    //maximumNumberOfbooking =Number(maximumNumberOfbooking)
+    const company = await Company.create({
+        name,
+        address,
+        website,
+        description,
+        tel,
+        numberOfbooking,
+        maximumNumberOfbooking
+      });
+  
+
     res.status(201).json({
         success: true, 
         data: company
@@ -52,7 +65,16 @@ exports.createCompany= async (req,res,next)=>{
 //@access   Private
 exports.updateCompany= async (req,res,next)=>{
     try{
-        const company = await Company.findByIdAndUpdate(req.params.id, req.body, {
+        const { name, address, website, description, tel,maximumNumberOfbooking } = req.body;
+        const company = await Company.findByIdAndUpdate(req.params.id, {
+            name,
+            address,
+            website,
+            description,
+            tel,
+            numberOfbooking,
+            maximumNumberOfbooking
+          }, {
             new: true,
             runValidators: true
         })

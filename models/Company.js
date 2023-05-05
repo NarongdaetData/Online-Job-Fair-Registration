@@ -22,7 +22,17 @@ description: {
 tel: {
     type: String,
     required: [true,'Please add a telephone number']
+    },
+numberOfbooking: {
+    type: Number,
+    required: [true,'Please add a numberOfbooking']
+    },
+maximumNumberOfbooking: {
+    type: Number,
+    required: [true,'Please add a maximumnumberOfbooking']
     }
+    
+
 },{
     toJSON: {virtuals:true},
     toObject: {virtuals:true}

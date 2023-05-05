@@ -111,11 +111,21 @@ exports.addBooking = async (req, res, next) => {
     try {
         req.body.company = req.params.companyId;
 
-        const company = await Company.findById(req.params.companyId);
+        var { name, address, website, description, tel ,numberOfbooking,maximumNumberOfbooking}  = await Company.findById(req.params.companyId);
+
+        if (numberOfbooking+1>maximumNumberOfbooking) {
+            return res.status(404).json({ success: false, message: `Booking is already full`});
+        }
+        numberOfbooking = numberOfbooking+1
+        const company = await Company.findByIdAndUpdate(req.params.companyId,{ name, address, website, description, tel ,numberOfbooking,maximumNumberOfbooking} , {
+            new: true,
+            runValidators: true
+        })
 
         if (!company) {
             return res.status(404).json({ success: false, message: `No company with the id of ${req.params.companyId}` });
         }
+
 
         //add user Id to req.body
         req.body.user = req.user.id;
