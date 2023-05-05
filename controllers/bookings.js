@@ -127,7 +127,12 @@ exports.updateBooking=async (req,res,next)=>{
         if(booking.user.toString()!== req.user.id && req.user.role!== 'admin'){
             return res.status(401).json({success:false, message:`User ${req.user.id} is not authorized to update this booking`});
         }
+        
+        if(Date.parse(req.body.bookingDate)<Date.parse("May 10, 2022") || 
+                Date.parse(req.body.bookingDate)>=Date.parse("May 14, 2022")){
 
+            return res.status(400).json({success:false, message:`The user with ID ${req.user.id} can only booking during May 10-13 2022`})
+}
         booking = await Booking.findByIdAndUpdate(req.params.id,req.body,{new:true, runValidators:true});
 
         res.status(200).json({
