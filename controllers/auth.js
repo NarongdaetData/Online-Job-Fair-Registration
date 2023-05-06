@@ -31,6 +31,19 @@ const sendTokenResponse = (user, statusCode, res) => {
 exports.register = async (req, res, next) => {
   try {
     const { name, tel, email, password, confirmpassword, role } = req.body;
+
+    // Inactivity timeout session
+    const sessionTimeout = 10*60*100; // 10 minutes in milliseconds
+    let timeoutID;
+    const clearSessionTimeout = () => clearTimeout(timeoutID);
+    const setSessionTimeout = () => {
+      timeoutID = setTimeout(() => {
+        clearSessionTimeout();
+        res.status(401).json({ success: false, message: "Timeout of inactivity" });
+      }, sessionTimeout);
+    };
+    setSessionTimeout();
+
     //Create user
     if(password != confirmpassword){
       return res.status(400).json({success:false, message:`password not match with the comfirmpassword`})
