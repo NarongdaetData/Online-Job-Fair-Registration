@@ -34,14 +34,16 @@ exports.register = async (req, res, next) => {
 
     // Inactivity timeout session
     const sessionTimeout = 600000; // 10 minutes in milliseconds
+    let lastActivityTime = Date.now();
     let timeoutID;
     const clearSessionTimeout = () => clearTimeout(timeoutID);
     const setSessionTimeout = () => {
-      clearSessionTimeout();
+      lastActivityTime = Date.now();
       timeoutID = setTimeout(() => {
-        res.status(401).json({ success: false, message: "Timeout of inactivity" });
-      }, sessionTimeout);
+        res.status(401).json({ success: false, message: "Timeout of inactivity. Please re-register." });
+      }, sessionTimeout - (Date.now() - lastActivityTime));
     };
+    setSessionTimeout();
 
     //Create user
     if (password != confirmpassword) {
@@ -54,21 +56,19 @@ exports.register = async (req, res, next) => {
       password,
       role,
     });
-    /// Set inactivity timeout for current session
-    setSessionTimeout();
-
     //Create token
     sendTokenResponse(user, 200, res);
 
-    // Clear inactivity timeout if the user sends another request within the 10-minute period
+    // Refresh session timeout when a new request is received
     req.on('data', () => {
+      clearSessionTimeout();
       setSessionTimeout();
     });
+
   } catch (err) {
     res.status(400).json({ success: false, message: `Invalid Input` });
     console.log(err.stack);
   }
-
 };
 
 //@desc Login user
