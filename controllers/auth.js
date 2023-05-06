@@ -33,20 +33,19 @@ exports.register = async (req, res, next) => {
     const { name, tel, email, password, confirmpassword, role } = req.body;
 
     // Inactivity timeout session
-    const sessionTimeout = 10*60*100; // 10 minutes in milliseconds
+    const sessionTimeout = 600000; // 10 minutes in milliseconds
     let timeoutID;
     const clearSessionTimeout = () => clearTimeout(timeoutID);
     const setSessionTimeout = () => {
+      clearSessionTimeout();
       timeoutID = setTimeout(() => {
-        clearSessionTimeout();
         res.status(401).json({ success: false, message: "Timeout of inactivity" });
       }, sessionTimeout);
     };
-    setSessionTimeout();
 
     //Create user
-    if(password != confirmpassword){
-      return res.status(400).json({success:false, message:`password not match with the comfirmpassword`})
+    if (password != confirmpassword) {
+      return res.status(400).json({ success: false, message: `password not match with the comfirmpassword` })
     }
     const user = await User.create({
       name,
@@ -55,14 +54,21 @@ exports.register = async (req, res, next) => {
       password,
       role,
     });
+    /// Set inactivity timeout for current session
+    setSessionTimeout();
+
     //Create token
-    //const token=user.getSignedJwtToken() ;
-    //res.status(200).json ({success:true,token});
     sendTokenResponse(user, 200, res);
+
+    // Clear inactivity timeout if the user sends another request within the 10-minute period
+    req.on('data', () => {
+      setSessionTimeout();
+    });
   } catch (err) {
-    res.status(400).json({ success: false , message:`Invalid Input`});
+    res.status(400).json({ success: false, message: `Invalid Input` });
     console.log(err.stack);
   }
+
 };
 
 //@desc Login user
@@ -71,38 +77,38 @@ exports.register = async (req, res, next) => {
 exports.login = async (req, res, next) => {
 
   try {
-  const { email, password } = req.body;
-  //Validate email & password
-  if (!email || !password) {
-    return res.status(400).json({
-      success: false,
-      msg: "Please provide an email and password",
-    });
-  }
-  //Check for user
-  const user = await User.findOne({ email }).select("+password");
-  if (!user) {
-    return res.status(400).json({
-      success: false,
-      msg: "Invalid credentials",
-    });
-  }
-  //Check if password matches
+    const { email, password } = req.body;
+    //Validate email & password
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        msg: "Please provide an email and password",
+      });
+    }
+    //Check for user
+    const user = await User.findOne({ email }).select("+password");
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        msg: "Invalid credentials",
+      });
+    }
+    //Check if password matches
 
-  const isMatch = await user.matchPassword(password);
-  if (!isMatch) {
-    return res.status(401).json({
-      success: false,
-      msg: "Invalid credentials",
-    });
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        msg: "Invalid credentials",
+      });
+    }
+    //Create token
+    //const token=user.getSignedJwtToken() ;
+    //res.status(200).json ({success:true,token});
+    sendTokenResponse(user, 200, res);
+  } catch (err) {
+    return res.status(401).json({ success: false, msg: 'Cannot convert email or password to string' });
   }
-  //Create token
-  //const token=user.getSignedJwtToken() ;
-  //res.status(200).json ({success:true,token});
-  sendTokenResponse(user, 200, res);
-}catch(err){
-  return res.status(401).json({success:false, msg:'Cannot convert email or password to string'});
-}
 };
 
 //Get token from model, create cookie and send response
@@ -125,9 +131,9 @@ exports.getMe = async (req, res, next) => {
 //@access Private
 
 exports.logout = async (req, res, next) => {
-  res.cookie('token','none',{
-    expires: new Date(Date.now(+10*60*100)),
-    httpOnly:true
+  res.cookie('token', 'none', {
+    expires: new Date(Date.now(+10 * 60 * 100)),
+    httpOnly: true
   })
   res.status(200).json({
     success: true,
